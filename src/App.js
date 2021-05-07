@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useEffect } from 'react';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
+import { sunRadius } from './constants/constants';
 
 function App() {
   useEffect(() => {
@@ -45,12 +46,12 @@ function App() {
      * Lights
      */
     // Ambient light
-    const ambientLight = new THREE.AmbientLight('#b9d5ff', 0.5);
+    const ambientLight = new THREE.AmbientLight('#fffff', 0.7);
     gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001);
     scene.add(ambientLight);
 
     // Directional light
-    const moonLight = new THREE.DirectionalLight('#b9d5ff', 0.5);
+    const moonLight = new THREE.DirectionalLight('#fffff', 1);
     moonLight.position.set(4, 5, -2);
 
     gui.add(moonLight, 'intensity').min(0).max(1).step(0.001);
@@ -64,14 +65,27 @@ function App() {
      */
     const textureLoader = new THREE.TextureLoader();
     const sunTexture = textureLoader.load('/images/sun-texture.png');
+    const mercuryTexture = textureLoader.load('images/mercury-texture.jpeg');
 
     /**
      * Sun
      */
-    const planetGeometry = new THREE.SphereGeometry(2, 32, 32);
+    const sunGeometry = new THREE.SphereGeometry(sunRadius, 32, 32);
     const sunMaterial = new THREE.MeshStandardMaterial({ map: sunTexture });
-    const sun = new THREE.Mesh(planetGeometry, sunMaterial);
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
     scene.add(sun);
+
+    /**
+     * Mercury
+     */
+    const mercuryGeometry = new THREE.SphereGeometry(sunRadius / 4, 32, 32);
+    const mercuryMaterial = new THREE.MeshStandardMaterial({
+      map: mercuryTexture,
+    });
+    const mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
+    scene.add(mercury);
+    mercury.position.x = 4;
+    mercury.position.z = -5;
 
     /**
      * Camera
@@ -85,7 +99,7 @@ function App() {
     );
     camera.position.x = 4;
     camera.position.y = 2;
-    camera.position.z = 5;
+    camera.position.z = 15;
     scene.add(camera);
 
     // Controls
@@ -97,7 +111,12 @@ function App() {
       const elapsedTime = clock.getElapsedTime();
       requestAnimationFrame(animate);
 
-      sun.rotation.y = Math.PI * 0.25 * elapsedTime;
+      sun.rotation.y = Math.PI * 0.1 * elapsedTime;
+
+      const angle = elapsedTime * 0.5;
+      mercury.position.x = Math.sin(angle) * 5;
+      mercury.position.z = Math.cos(angle) * 3;
+      mercury.position.y = Math.cos(angle) * -2;
       // Update controls
       controls.update();
 
