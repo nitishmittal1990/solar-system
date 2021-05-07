@@ -64,8 +64,12 @@ function App() {
      * Textures
      */
     const textureLoader = new THREE.TextureLoader();
-    const sunTexture = textureLoader.load('/images/sun-texture.png');
+    const sunTexture = textureLoader.load('/images/sun-texture.jpeg');
     const mercuryTexture = textureLoader.load('images/mercury-texture.jpeg');
+    const earthTexture = textureLoader.load('images/earth-texture.jpeg');
+    const earthNormalTexture = textureLoader.load('images/earth-normal.tif');
+    const starTexture = textureLoader.load('images/bg/stars.jpeg');
+    scene.background = starTexture;
 
     /**
      * Sun
@@ -84,8 +88,21 @@ function App() {
     });
     const mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
     scene.add(mercury);
-    mercury.position.x = 4;
+    mercury.position.x = 3;
     mercury.position.z = -5;
+
+    /**
+     * Mercury
+     */
+    const earthGeometry = new THREE.SphereGeometry(sunRadius / 3, 32, 32);
+    const earthMaterial = new THREE.MeshStandardMaterial({
+      map: earthTexture,
+      normalMap: earthNormalTexture,
+    });
+    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    scene.add(earth);
+    earth.position.x = 5;
+    earth.position.z = -5;
 
     /**
      * Camera
@@ -113,10 +130,16 @@ function App() {
 
       sun.rotation.y = Math.PI * 0.1 * elapsedTime;
 
-      const angle = elapsedTime * 0.5;
-      mercury.position.x = Math.sin(angle) * 5;
-      mercury.position.z = Math.cos(angle) * 3;
-      mercury.position.y = Math.cos(angle) * -2;
+      const mercuryAngle = elapsedTime * 0.5;
+      mercury.position.x = Math.sin(mercuryAngle) * 3;
+      mercury.position.z = Math.cos(mercuryAngle) * 3;
+      mercury.position.y = Math.cos(mercuryAngle) * -2;
+      mercury.rotation.y = Math.PI * 0.7 * elapsedTime;
+
+      const earthAngle = elapsedTime * 0.2;
+      earth.position.x = Math.sin(earthAngle) * 6;
+      earth.position.z = Math.cos(earthAngle) * 6;
+      earth.rotation.y = Math.PI * 0.5 * elapsedTime;
       // Update controls
       controls.update();
 
