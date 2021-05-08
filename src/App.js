@@ -69,6 +69,7 @@ function App() {
     const textureLoader = new THREE.TextureLoader();
     const sunTexture = textureLoader.load('/images/sun-texture.jpeg');
     const mercuryTexture = textureLoader.load('images/mercury-texture.jpeg');
+    const venusTexture = textureLoader.load('images/venus-texture.jpeg');
     const earthTexture = textureLoader.load('images/earth-texture.jpeg');
     const earthNormalTexture = textureLoader.load('images/earth-normal.tif');
     const starTexture = textureLoader.load('images/bg/stars.jpeg');
@@ -85,17 +86,29 @@ function App() {
     /**
      * Mercury
      */
-    const mercuryGeometry = new THREE.SphereGeometry(sunRadius / 4, 32, 32);
+    const mercuryGeometry = new THREE.SphereGeometry(sunRadius / 5, 32, 32);
     const mercuryMaterial = new THREE.MeshStandardMaterial({
       map: mercuryTexture,
     });
     const mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
     scene.add(mercury);
     mercury.position.x = 3;
-    mercury.position.z = -5;
+    mercury.position.z = -3;
 
     /**
-     * Mercury
+     * venus
+     */
+    const venusGeometry = new THREE.SphereGeometry(sunRadius / 3.5, 32, 32);
+    const venusMaterial = new THREE.MeshStandardMaterial({
+      map: venusTexture,
+    });
+    const venus = new THREE.Mesh(venusGeometry, venusMaterial);
+    scene.add(venus);
+    venus.position.x = mercury.position.x + 1.5;
+    venus.position.z = -3;
+
+    /**
+     * earth
      */
     const earthGeometry = new THREE.SphereGeometry(sunRadius / 3, 32, 32);
     const earthMaterial = new THREE.MeshStandardMaterial({
@@ -104,8 +117,8 @@ function App() {
     });
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
     scene.add(earth);
-    earth.position.x = 5;
-    earth.position.z = -5;
+    earth.position.x = venus.position.x + 1.8;
+    earth.position.z = -3;
 
     /**
      * Camera
@@ -133,18 +146,25 @@ function App() {
       const elapsedTime = clock.getElapsedTime();
       requestAnimationFrame(animate);
 
-      sun.rotation.y = Math.PI * 0.1 * elapsedTime;
+      sun.rotation.y = Math.PI * 0.05 * elapsedTime;
 
       const mercuryAngle = elapsedTime * 0.5;
       mercury.position.x = Math.sin(mercuryAngle) * 3;
-      mercury.position.z = Math.cos(mercuryAngle) * 3;
+      mercury.position.z = Math.cos(mercuryAngle) * 4;
       mercury.position.y = Math.cos(mercuryAngle) * -2;
       mercury.rotation.y = Math.PI * 0.7 * elapsedTime;
 
+      const venusAngle = elapsedTime * 0.3;
+      venus.position.x = Math.sin(venusAngle) * 4.5;
+      venus.position.z = Math.cos(venusAngle) * 4;
+      venus.position.y = Math.cos(mercuryAngle) * 0.5;
+      venus.rotation.y = Math.PI * 0.5 * elapsedTime;
+
       const earthAngle = elapsedTime * 0.2;
-      earth.position.x = Math.sin(earthAngle) * 6;
-      earth.position.z = Math.cos(earthAngle) * 6;
-      earth.rotation.y = Math.PI * 0.5 * elapsedTime;
+      earth.position.x = Math.sin(earthAngle) * 6.3;
+      earth.position.z = Math.cos(earthAngle) * 7;
+      earth.position.y = Math.cos(earthAngle) * -0.5;
+      earth.rotation.y = Math.PI * 0.3 * elapsedTime;
       // Update controls
       controls.update();
 
