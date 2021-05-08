@@ -1,7 +1,10 @@
 import './App.css';
 import * as THREE from 'three';
 import { useEffect } from 'react';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import {
+  OrbitControls,
+  MapControls,
+} from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 import { sunRadius } from './constants/constants';
 
@@ -120,8 +123,10 @@ function App() {
     scene.add(camera);
 
     // Controls
-    const controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new MapControls(camera, renderer.domElement);
     controls.enableDamping = true;
+    controls.minDistance = 10;
+    controls.maxDistance = 100;
 
     const clock = new THREE.Clock();
     var animate = function () {
