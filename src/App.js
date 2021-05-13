@@ -1,10 +1,7 @@
 import './App.css';
 import * as THREE from 'three';
 import { useEffect } from 'react';
-import {
-  OrbitControls,
-  MapControls,
-} from 'three/examples/jsm/controls/OrbitControls.js';
+import { MapControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 import { sunRadius } from './constants/constants';
 
@@ -50,17 +47,17 @@ function App() {
      */
     // Ambient light
     const ambientLight = new THREE.AmbientLight('#fffff', 0.7);
-    gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001);
+    // gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001);
     scene.add(ambientLight);
 
     // Directional light
     const moonLight = new THREE.DirectionalLight('#fffff', 1);
     moonLight.position.set(4, 5, -2);
 
-    gui.add(moonLight, 'intensity').min(0).max(1).step(0.001);
-    gui.add(moonLight.position, 'x').min(-5).max(5).step(0.001);
-    gui.add(moonLight.position, 'y').min(-5).max(5).step(0.001);
-    gui.add(moonLight.position, 'z').min(-5).max(5).step(0.001);
+    // gui.add(moonLight, 'intensity').min(0).max(1).step(0.001);
+    // gui.add(moonLight.position, 'x').min(-5).max(5).step(0.001);
+    // gui.add(moonLight.position, 'y').min(-5).max(5).step(0.001);
+    // gui.add(moonLight.position, 'z').min(-5).max(5).step(0.001);
     scene.add(moonLight);
 
     /**
@@ -72,6 +69,10 @@ function App() {
     const venusTexture = textureLoader.load('images/venus-texture.jpeg');
     const earthTexture = textureLoader.load('images/earth-texture.jpeg');
     const earthNormalTexture = textureLoader.load('images/earth-normal.tif');
+    const saturnTexture = textureLoader.load('/images/saturn-texture.jpeg');
+    const saturnRingTexture = textureLoader.load(
+      '/images/saturn-ring-alpha.png'
+    );
     const starTexture = textureLoader.load('images/bg/stars.jpeg');
     scene.background = starTexture;
 
@@ -119,6 +120,35 @@ function App() {
     scene.add(earth);
     earth.position.x = venus.position.x + 1.8;
     earth.position.z = -3;
+
+    /**
+     * Saturn
+     */
+    const saturnGeometry = new THREE.SphereGeometry(sunRadius / 2, 32, 32);
+    const saturnMaterial = new THREE.MeshStandardMaterial({
+      map: saturnTexture,
+    });
+    const saturnMesh = new THREE.Mesh(saturnGeometry, saturnMaterial);
+
+    const saturnRingGeometry = new THREE.RingGeometry(1.5, 2.2, 32, 12);
+    const saturnRingMaterial = new THREE.MeshStandardMaterial({
+      map: saturnRingTexture,
+      side: THREE.DoubleSide,
+    });
+
+    const saturnRing = new THREE.Mesh(saturnRingGeometry, saturnRingMaterial);
+
+    saturnRing.rotation.x = -Math.PI * 0.4;
+    gui
+      .add(saturnRing.rotation, 'x')
+      .min(0)
+      .max(Math.PI * 2);
+    const saturn = new THREE.Group();
+    saturn.add(saturnMesh);
+    saturn.add(saturnRing);
+    scene.add(saturn);
+    saturn.position.x = earth.position.x + 3;
+    saturn.position.z = -3;
 
     /**
      * Camera
