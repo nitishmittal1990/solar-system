@@ -7,6 +7,7 @@ import {
 } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 import { sunRadius } from './constants/constants';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 function App() {
   useEffect(() => {
@@ -62,6 +63,8 @@ function App() {
     gui.add(moonLight.position, 'y').min(-5).max(5).step(0.001);
     gui.add(moonLight.position, 'z').min(-5).max(5).step(0.001);
     scene.add(moonLight);
+
+    const loader = new GLTFLoader();
 
     /**
      * Textures
@@ -121,6 +124,18 @@ function App() {
     earth.position.z = -3;
 
     /**
+     * saturn
+     */
+    let saturn = null;
+    loader.load('models/saturn.glb', (glb) => {
+      saturn = glb.scene;
+      saturn.scale.set(0.001, 0.001, 0.001);
+      saturn.position.x = 8.8;
+      saturn.position.z = -3;
+      scene.add(saturn);
+    });
+
+    /**
      * Camera
      */
     // Base camera
@@ -165,6 +180,14 @@ function App() {
       earth.position.z = Math.cos(earthAngle) * 7;
       earth.position.y = Math.cos(earthAngle) * -0.5;
       earth.rotation.y = Math.PI * 0.3 * elapsedTime;
+
+      if (saturn) {
+        const saturnAngle = elapsedTime * 0.09;
+        saturn.position.x = Math.sin(saturnAngle) * 8.3;
+        saturn.position.z = Math.cos(saturnAngle) * 9;
+        saturn.position.y = Math.cos(saturnAngle) * -0.9;
+        saturn.rotation.y = Math.PI * 0.1 * elapsedTime;
+      }
       // Update controls
       controls.update();
 
