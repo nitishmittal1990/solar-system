@@ -1,10 +1,7 @@
 import './App.css';
 import * as THREE from 'three';
 import { useEffect } from 'react';
-import {
-  OrbitControls,
-  MapControls,
-} from 'three/examples/jsm/controls/OrbitControls.js';
+import { MapControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 import { sunRadius } from './constants/constants';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
