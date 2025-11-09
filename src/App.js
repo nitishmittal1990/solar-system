@@ -65,6 +65,9 @@ function App() {
 
     const loader = new GLTFLoader();
 
+    // Array of all planets for raycasting
+    const planetsArray = [];
+
     /**
      * Textures
      */
@@ -85,6 +88,7 @@ function App() {
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
     sun.userData.name = 'Sun';
     scene.add(sun);
+    planetsArray.push(sun);
 
     /**
      * Mercury
@@ -98,6 +102,7 @@ function App() {
     scene.add(mercury);
     mercury.position.x = 3;
     mercury.position.z = -3;
+    planetsArray.push(mercury);
 
     /**
      * venus
@@ -111,6 +116,7 @@ function App() {
     scene.add(venus);
     venus.position.x = mercury.position.x + 1.5;
     venus.position.z = -3;
+    planetsArray.push(venus);
 
     /**
      * earth
@@ -125,6 +131,7 @@ function App() {
     scene.add(earth);
     earth.position.x = venus.position.x + 1.8;
     earth.position.z = -3;
+    planetsArray.push(earth);
 
     /**
      * Mars
@@ -139,6 +146,7 @@ function App() {
     scene.add(mars);
     mars.position.x = earth.position.x + 2.5;
     mars.position.z = -3;
+    planetsArray.push(mars);
 
     /**
      * Jupiter
@@ -153,12 +161,12 @@ function App() {
     scene.add(jupiter);
     jupiter.position.x = mars.position.x + 4.5;
     jupiter.position.z = -3;
+    planetsArray.push(jupiter);
 
     /**
      * saturn
      */
     let saturn = null;
-    const planetsArray = [sun, mercury, venus, earth, mars, jupiter, uranus, neptune];
 
     loader.load('models/saturn.glb', (glb) => {
       saturn = glb.scene;
@@ -167,6 +175,7 @@ function App() {
       saturn.position.x = jupiter.position.x + 5;
       saturn.position.z = -3;
       scene.add(saturn);
+      // Add Saturn to planets array for raycasting (defined below)
       planetsArray.push(saturn);
     });
 
@@ -183,6 +192,7 @@ function App() {
     scene.add(uranus);
     uranus.position.x = 19;
     uranus.position.z = -3;
+    planetsArray.push(uranus);
 
     /**
      * Neptune
@@ -197,6 +207,7 @@ function App() {
     scene.add(neptune);
     neptune.position.x = uranus.position.x + 3.5;
     neptune.position.z = -3;
+    planetsArray.push(neptune);
 
     /**
      * Camera
