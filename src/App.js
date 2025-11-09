@@ -123,7 +123,7 @@ function App() {
     /**
      * Mars
      */
-    const marsGeometry = new THREE.SphereGeometry(sunRadius / 4, 32, 32);
+    const marsGeometry = new THREE.SphereGeometry(sunRadius / 6, 32, 32);
     const marsMaterial = new THREE.MeshStandardMaterial({
       color: '#E27B58',
       roughness: 0.8,
@@ -136,7 +136,7 @@ function App() {
     /**
      * Jupiter
      */
-    const jupiterGeometry = new THREE.SphereGeometry(sunRadius * 1.8, 32, 32);
+    const jupiterGeometry = new THREE.SphereGeometry(sunRadius / 2.5, 32, 32);
     const jupiterMaterial = new THREE.MeshStandardMaterial({
       color: '#C88B3A',
       roughness: 0.6,
@@ -161,7 +161,7 @@ function App() {
     /**
      * Uranus
      */
-    const uranusGeometry = new THREE.SphereGeometry(sunRadius * 0.8, 32, 32);
+    const uranusGeometry = new THREE.SphereGeometry(sunRadius / 3.5, 32, 32);
     const uranusMaterial = new THREE.MeshStandardMaterial({
       color: '#4FD0E0',
       roughness: 0.5,
@@ -174,7 +174,7 @@ function App() {
     /**
      * Neptune
      */
-    const neptuneGeometry = new THREE.SphereGeometry(sunRadius * 0.75, 32, 32);
+    const neptuneGeometry = new THREE.SphereGeometry(sunRadius / 3.8, 32, 32);
     const neptuneMaterial = new THREE.MeshStandardMaterial({
       color: '#4166F5',
       roughness: 0.5,
@@ -192,11 +192,11 @@ function App() {
       75,
       sizes.width / sizes.height,
       0.1,
-      100
+      200
     );
-    camera.position.x = 4;
-    camera.position.y = 2;
-    camera.position.z = 15;
+    camera.position.x = 0;
+    camera.position.y = 15;
+    camera.position.z = 35;
     scene.add(camera);
 
     // Controls
