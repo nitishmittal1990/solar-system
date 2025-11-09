@@ -1,12 +1,14 @@
 import './App.css';
 import * as THREE from 'three';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 import { sunRadius } from './constants/constants';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 function App() {
+  const planetLabelRef = useRef(null);
+
   useEffect(() => {
     // Debug
     const gui = new dat.GUI();
@@ -81,6 +83,7 @@ function App() {
     const sunGeometry = new THREE.SphereGeometry(sunRadius, 32, 32);
     const sunMaterial = new THREE.MeshStandardMaterial({ map: sunTexture });
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    sun.userData.name = 'Sun';
     scene.add(sun);
 
     /**
@@ -91,6 +94,7 @@ function App() {
       map: mercuryTexture,
     });
     const mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
+    mercury.userData.name = 'Mercury';
     scene.add(mercury);
     mercury.position.x = 3;
     mercury.position.z = -3;
@@ -103,6 +107,7 @@ function App() {
       map: venusTexture,
     });
     const venus = new THREE.Mesh(venusGeometry, venusMaterial);
+    venus.userData.name = 'Venus';
     scene.add(venus);
     venus.position.x = mercury.position.x + 1.5;
     venus.position.z = -3;
@@ -116,6 +121,7 @@ function App() {
       normalMap: earthNormalTexture,
     });
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    earth.userData.name = 'Earth';
     scene.add(earth);
     earth.position.x = venus.position.x + 1.8;
     earth.position.z = -3;
@@ -129,6 +135,7 @@ function App() {
       roughness: 0.8,
     });
     const mars = new THREE.Mesh(marsGeometry, marsMaterial);
+    mars.userData.name = 'Mars';
     scene.add(mars);
     mars.position.x = earth.position.x + 2.5;
     mars.position.z = -3;
@@ -142,6 +149,7 @@ function App() {
       roughness: 0.6,
     });
     const jupiter = new THREE.Mesh(jupiterGeometry, jupiterMaterial);
+    jupiter.userData.name = 'Jupiter';
     scene.add(jupiter);
     jupiter.position.x = mars.position.x + 4.5;
     jupiter.position.z = -3;
@@ -150,12 +158,16 @@ function App() {
      * saturn
      */
     let saturn = null;
+    const planetsArray = [sun, mercury, venus, earth, mars, jupiter, uranus, neptune];
+
     loader.load('models/saturn.glb', (glb) => {
       saturn = glb.scene;
+      saturn.userData.name = 'Saturn';
       saturn.scale.set(0.001, 0.001, 0.001);
       saturn.position.x = jupiter.position.x + 5;
       saturn.position.z = -3;
       scene.add(saturn);
+      planetsArray.push(saturn);
     });
 
     /**
@@ -167,6 +179,7 @@ function App() {
       roughness: 0.5,
     });
     const uranus = new THREE.Mesh(uranusGeometry, uranusMaterial);
+    uranus.userData.name = 'Uranus';
     scene.add(uranus);
     uranus.position.x = 19;
     uranus.position.z = -3;
@@ -180,6 +193,7 @@ function App() {
       roughness: 0.5,
     });
     const neptune = new THREE.Mesh(neptuneGeometry, neptuneMaterial);
+    neptune.userData.name = 'Neptune';
     scene.add(neptune);
     neptune.position.x = uranus.position.x + 3.5;
     neptune.position.z = -3;
@@ -204,6 +218,44 @@ function App() {
     controls.enableDamping = true;
     controls.minDistance = 5;
     controls.maxDistance = 150;
+
+    // Raycaster for hover detection
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    // Mouse move event for hover detection
+    const onMouseMove = (event) => {
+      mouse.x = (event.clientX / sizes.width) * 2 - 1;
+      mouse.y = -(event.clientY / sizes.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(planetsArray, true);
+
+      if (intersects.length > 0) {
+        const intersectedObject = intersects[0].object;
+        let planetName = intersectedObject.userData.name;
+
+        // For Saturn (GLTF model), check parent hierarchy
+        if (!planetName && intersectedObject.parent) {
+          let parent = intersectedObject.parent;
+          while (parent && !planetName) {
+            planetName = parent.userData.name;
+            parent = parent.parent;
+          }
+        }
+
+        if (planetName && planetLabelRef.current) {
+          planetLabelRef.current.textContent = planetName;
+          planetLabelRef.current.style.display = 'block';
+          planetLabelRef.current.style.left = event.clientX + 15 + 'px';
+          planetLabelRef.current.style.top = event.clientY + 15 + 'px';
+        }
+      } else if (planetLabelRef.current) {
+        planetLabelRef.current.style.display = 'none';
+      }
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
 
     const clock = new THREE.Clock();
     var animate = function () {
@@ -269,9 +321,19 @@ function App() {
       renderer.render(scene, camera);
     };
     animate();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      document.body.removeChild(renderer.domElement);
+    };
   }, []);
 
-  return <div className="App"></div>;
+  return (
+    <div className="App">
+      <div ref={planetLabelRef} className="planet-label"></div>
+    </div>
+  );
 }
 
 export default App;
