@@ -1,12 +1,14 @@
 import './App.css';
 import * as THREE from 'three';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { MapControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 import { sunRadius } from './constants/constants';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 function App() {
+  const planetLabelRef = useRef(null);
+
   useEffect(() => {
     // Debug
     const gui = new dat.GUI();
@@ -63,6 +65,9 @@ function App() {
 
     const loader = new GLTFLoader();
 
+    // Array of all planets for raycasting
+    const planetsArray = [];
+
     /**
      * Textures
      */
@@ -81,7 +86,9 @@ function App() {
     const sunGeometry = new THREE.SphereGeometry(sunRadius, 32, 32);
     const sunMaterial = new THREE.MeshStandardMaterial({ map: sunTexture });
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    sun.userData.name = 'Sun';
     scene.add(sun);
+    planetsArray.push(sun);
 
     /**
      * Mercury
@@ -91,9 +98,11 @@ function App() {
       map: mercuryTexture,
     });
     const mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
+    mercury.userData.name = 'Mercury';
     scene.add(mercury);
     mercury.position.x = 3;
     mercury.position.z = -3;
+    planetsArray.push(mercury);
 
     /**
      * venus
@@ -103,9 +112,11 @@ function App() {
       map: venusTexture,
     });
     const venus = new THREE.Mesh(venusGeometry, venusMaterial);
+    venus.userData.name = 'Venus';
     scene.add(venus);
     venus.position.x = mercury.position.x + 1.5;
     venus.position.z = -3;
+    planetsArray.push(venus);
 
     /**
      * earth
@@ -116,21 +127,87 @@ function App() {
       normalMap: earthNormalTexture,
     });
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    earth.userData.name = 'Earth';
     scene.add(earth);
     earth.position.x = venus.position.x + 1.8;
     earth.position.z = -3;
+    planetsArray.push(earth);
+
+    /**
+     * Mars
+     */
+    const marsGeometry = new THREE.SphereGeometry(sunRadius / 6, 32, 32);
+    const marsMaterial = new THREE.MeshStandardMaterial({
+      color: '#E27B58',
+      roughness: 0.8,
+    });
+    const mars = new THREE.Mesh(marsGeometry, marsMaterial);
+    mars.userData.name = 'Mars';
+    scene.add(mars);
+    mars.position.x = earth.position.x + 2.5;
+    mars.position.z = -3;
+    planetsArray.push(mars);
+
+    /**
+     * Jupiter
+     */
+    const jupiterGeometry = new THREE.SphereGeometry(sunRadius / 2.5, 32, 32);
+    const jupiterMaterial = new THREE.MeshStandardMaterial({
+      color: '#C88B3A',
+      roughness: 0.6,
+    });
+    const jupiter = new THREE.Mesh(jupiterGeometry, jupiterMaterial);
+    jupiter.userData.name = 'Jupiter';
+    scene.add(jupiter);
+    jupiter.position.x = mars.position.x + 4.5;
+    jupiter.position.z = -3;
+    planetsArray.push(jupiter);
 
     /**
      * saturn
      */
     let saturn = null;
+
     loader.load('models/saturn.glb', (glb) => {
       saturn = glb.scene;
+      saturn.userData.name = 'Saturn';
       saturn.scale.set(0.001, 0.001, 0.001);
-      saturn.position.x = 8.8;
+      saturn.position.x = jupiter.position.x + 5;
       saturn.position.z = -3;
       scene.add(saturn);
+      // Add Saturn to planets array for raycasting (defined below)
+      planetsArray.push(saturn);
     });
+
+    /**
+     * Uranus
+     */
+    const uranusGeometry = new THREE.SphereGeometry(sunRadius / 3.5, 32, 32);
+    const uranusMaterial = new THREE.MeshStandardMaterial({
+      color: '#4FD0E0',
+      roughness: 0.5,
+    });
+    const uranus = new THREE.Mesh(uranusGeometry, uranusMaterial);
+    uranus.userData.name = 'Uranus';
+    scene.add(uranus);
+    uranus.position.x = 19;
+    uranus.position.z = -3;
+    planetsArray.push(uranus);
+
+    /**
+     * Neptune
+     */
+    const neptuneGeometry = new THREE.SphereGeometry(sunRadius / 3.8, 32, 32);
+    const neptuneMaterial = new THREE.MeshStandardMaterial({
+      color: '#4166F5',
+      roughness: 0.5,
+    });
+    const neptune = new THREE.Mesh(neptuneGeometry, neptuneMaterial);
+    neptune.userData.name = 'Neptune';
+    scene.add(neptune);
+    neptune.position.x = uranus.position.x + 3.5;
+    neptune.position.z = -3;
+    planetsArray.push(neptune);
 
     /**
      * Camera
@@ -140,18 +217,56 @@ function App() {
       75,
       sizes.width / sizes.height,
       0.1,
-      100
+      200
     );
-    camera.position.x = 4;
-    camera.position.y = 2;
-    camera.position.z = 15;
+    camera.position.x = 0;
+    camera.position.y = 15;
+    camera.position.z = 35;
     scene.add(camera);
 
     // Controls
     const controls = new MapControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.minDistance = 10;
-    controls.maxDistance = 100;
+    controls.minDistance = 5;
+    controls.maxDistance = 150;
+
+    // Raycaster for hover detection
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    // Mouse move event for hover detection
+    const onMouseMove = (event) => {
+      mouse.x = (event.clientX / sizes.width) * 2 - 1;
+      mouse.y = -(event.clientY / sizes.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(planetsArray, true);
+
+      if (intersects.length > 0) {
+        const intersectedObject = intersects[0].object;
+        let planetName = intersectedObject.userData.name;
+
+        // For Saturn (GLTF model), check parent hierarchy
+        if (!planetName && intersectedObject.parent) {
+          let parent = intersectedObject.parent;
+          while (parent && !planetName) {
+            planetName = parent.userData.name;
+            parent = parent.parent;
+          }
+        }
+
+        if (planetName && planetLabelRef.current) {
+          planetLabelRef.current.textContent = planetName;
+          planetLabelRef.current.style.display = 'block';
+          planetLabelRef.current.style.left = event.clientX + 15 + 'px';
+          planetLabelRef.current.style.top = event.clientY + 15 + 'px';
+        }
+      } else if (planetLabelRef.current) {
+        planetLabelRef.current.style.display = 'none';
+      }
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
 
     const clock = new THREE.Clock();
     var animate = function () {
@@ -178,13 +293,38 @@ function App() {
       earth.position.y = Math.cos(earthAngle) * -0.5;
       earth.rotation.y = Math.PI * 0.3 * elapsedTime;
 
+      const marsAngle = elapsedTime * 0.15;
+      mars.position.x = Math.sin(marsAngle) * 7.8;
+      mars.position.z = Math.cos(marsAngle) * 8.5;
+      mars.position.y = Math.cos(marsAngle) * -0.7;
+      mars.rotation.y = Math.PI * 0.25 * elapsedTime;
+
+      const jupiterAngle = elapsedTime * 0.08;
+      jupiter.position.x = Math.sin(jupiterAngle) * 11;
+      jupiter.position.z = Math.cos(jupiterAngle) * 12;
+      jupiter.position.y = Math.cos(jupiterAngle) * -1.2;
+      jupiter.rotation.y = Math.PI * 0.15 * elapsedTime;
+
       if (saturn) {
-        const saturnAngle = elapsedTime * 0.09;
-        saturn.position.x = Math.sin(saturnAngle) * 8.3;
-        saturn.position.z = Math.cos(saturnAngle) * 9;
-        saturn.position.y = Math.cos(saturnAngle) * -0.9;
+        const saturnAngle = elapsedTime * 0.06;
+        saturn.position.x = Math.sin(saturnAngle) * 15;
+        saturn.position.z = Math.cos(saturnAngle) * 16;
+        saturn.position.y = Math.cos(saturnAngle) * -1.5;
         saturn.rotation.y = Math.PI * 0.1 * elapsedTime;
       }
+
+      const uranusAngle = elapsedTime * 0.04;
+      uranus.position.x = Math.sin(uranusAngle) * 19;
+      uranus.position.z = Math.cos(uranusAngle) * 20;
+      uranus.position.y = Math.cos(uranusAngle) * -1.8;
+      uranus.rotation.y = Math.PI * 0.08 * elapsedTime;
+
+      const neptuneAngle = elapsedTime * 0.03;
+      neptune.position.x = Math.sin(neptuneAngle) * 22.5;
+      neptune.position.z = Math.cos(neptuneAngle) * 24;
+      neptune.position.y = Math.cos(neptuneAngle) * -2;
+      neptune.rotation.y = Math.PI * 0.07 * elapsedTime;
+
       // Update controls
       controls.update();
 
@@ -192,9 +332,19 @@ function App() {
       renderer.render(scene, camera);
     };
     animate();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      document.body.removeChild(renderer.domElement);
+    };
   }, []);
 
-  return <div className="App"></div>;
+  return (
+    <div className="App">
+      <div ref={planetLabelRef} className="planet-label"></div>
+    </div>
+  );
 }
 
 export default App;
